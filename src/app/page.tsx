@@ -3,15 +3,28 @@
 import { useChat } from '@ai-sdk/react';
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat();
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+    api: '/api/chat',
+  });
+  
   return (
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
+      {error && (
+        <div className="text-red-500 mb-4">
+          Error: {error.message}
+        </div>
+      )}
+      
       {messages.map((message) => (
-        <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === 'user' ? 'User: ' : 'AI: '}
+        <div key={message.id} className="whitespace-pre-wrap mb-4">
+          <strong>{message.role === 'user' ? 'User: ' : 'AI: '}</strong>
           {message.content}
         </div>
       ))}
+      
+      {isLoading && (
+        <div className="text-gray-500">AI is thinking...</div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <input
@@ -19,6 +32,7 @@ export default function Chat() {
           value={input}
           placeholder="Say something..."
           onChange={handleInputChange}
+          disabled={isLoading}
         />
       </form>
     </div>

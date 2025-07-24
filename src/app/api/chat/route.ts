@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool } from 'ai';
+import { streamText } from 'ai';
 import { z } from 'zod';
 
 export const maxDuration = 30;
@@ -7,11 +7,11 @@ export const maxDuration = 30;
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  const result = streamText({
-    model: openai('gpt-4o'),
+  const result = await streamText({
+    model: openai('gpt-4o-mini'), // Much cheaper than gpt-4o
     messages,
     tools: {
-      weather: tool({
+      weather: {
         description: 'Get the weather in a location (fahrenheit)',
         parameters: z.object({
           location: z.string().describe('The location to get the weather for'),
@@ -23,8 +23,8 @@ export async function POST(req: Request) {
             temperature,
           };
         },
-      }),
-      convertFahrenheitToCelsius: tool({
+      },
+      convertFahrenheitToCelsius: {
         description: 'Convert a temperature in fahrenheit to celsius',
         parameters: z.object({
           temperature: z
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
             celsius,
           };
         },
-      }),
+      },
     },
   });
 
